@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import RsiDisplay from '@/components/RsiDisplay'
 import HistoricalRsiDisplay from '@/components/HistoricalRsiDisplay'
+import TickerBanner from '@/components/TickerBanner'
 
 export default function Home() {
   const [ticker, setTicker] = useState('')
@@ -69,6 +70,7 @@ export default function Home() {
 
   return (
     <main className="container">
+      <TickerBanner />
       <header>
         <h1>Stock Technical Analysis</h1>
         <p>Enter a stock ticker to view the RSI</p>
