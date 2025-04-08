@@ -59,8 +59,24 @@ const RsiDisplay: React.FC<RsiDisplayProps> = ({
   return (
     <div className="rsi-display">
       <div className="rsi-title">RSI Analysis for {symbol}</div>
-      <div className="rsi-value">RSI Value: {rsiValue.toFixed(2)}</div>
-      <div className="rsi-timestamp">Last Updated: {formatDate(timestamp)}</div>
+      <table className="rsi-data-table">
+        <colgroup>
+          <col style={{ width: '60%' }} />
+          <col style={{ width: '40%' }} />
+        </colgroup>
+        <thead>
+          <tr className="table-header">
+            <th className="table-cell" style={{ textAlign: 'left', paddingLeft: '30px' }}>Date</th>
+            <th className="table-cell">RSI Value</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr className="table-row">
+            <td className="table-cell" style={{ textAlign: 'left', paddingLeft: '30px' }}>{formatDate(timestamp)}</td>
+            <td className="table-cell">{rsiValue.toFixed(2)}</td>
+          </tr>
+        </tbody>
+      </table>
     </div>
   );
 };
