@@ -1,26 +1,337 @@
-@import "tailwindcss";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --foreground: #ffffff;
+  --background: #000080;
+  --card-bg: #0000a0;
+  --button-bg: #c0c0c0;
+  --button-hover: #a0a0a0;
+  --input-bg: #0000a0;
+  --input-border: #c0c0c0;
+  --accent: #00ff00;
+  --text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.5);
+  --overbought: #ff0000;
+  --oversold: #00ff00;
+  --neutral: #ffff00;
 }
 
 body {
-  background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--background);
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+  font-family: 'Courier New', monospace;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+/* Performance optimizations */
+* {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+/* Optimize animations */
+@media (prefers-reduced-motion: no-preference) {
+  .animate-fade-in {
+    animation: fadeIn 0.3s ease-in-out;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Optimize images */
+img {
+  content-visibility: auto;
+}
+
+/* Optimize text rendering */
+h1, h2, h3, h4, h5, h6 {
+  font-feature-settings: "kern" 1;
+  font-kerning: normal;
+}
+
+.container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 1rem;
+}
+
+header {
+  text-align: center;
+  margin-bottom: 2rem;
+  padding: 1rem;
+  background: var(--card-bg);
+  border: 2px solid var(--input-border);
+  box-shadow: 3px 3px 0 #000;
+}
+
+h1 {
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+  color: var(--accent);
+  text-shadow: var(--text-shadow);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.search-form {
+  max-width: 500px;
+  margin: 0 auto;
+  background: var(--card-bg);
+  padding: 1rem;
+  border: 2px solid var(--input-border);
+  box-shadow: 3px 3px 0 #000;
+}
+
+.input-group {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.ticker-input {
+  flex: 1;
+  background: var(--input-bg);
+  border: 2px solid var(--input-border);
+  color: var(--foreground);
+  padding: 0.5rem;
+  font-size: 1rem;
+  outline: none;
+  font-family: 'Courier New', monospace;
+  text-transform: uppercase;
+}
+
+.ticker-input:focus {
+  border-color: var(--accent);
+}
+
+.ticker-input::placeholder {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.options-group {
+  display: flex;
+  justify-content: center;
+  gap: 2rem;
+  margin-bottom: 1rem;
+  padding: 0.5rem;
+  background: var(--input-bg);
+  border: 2px solid var(--input-border);
+}
+
+.option {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.radio-input {
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border: 2px solid var(--input-border);
+  background: var(--button-bg);
+  margin: 0;
+  position: relative;
+  cursor: pointer;
+}
+
+.radio-input:checked {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+.radio-input:checked::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 8px;
+  height: 8px;
+  background: #000;
+}
+
+.radio-label {
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.date-range {
+  margin-bottom: 1rem;
+  padding: 0.5rem;
+  background: var(--input-bg);
+  border: 2px solid var(--input-border);
+}
+
+.date-label {
+  min-width: 80px;
+  font-weight: bold;
+}
+
+.date-input {
+  flex: 1;
+  background: var(--button-bg);
+  border: 2px solid var(--input-border);
+  color: #000;
+  padding: 0.5rem;
+  font-size: 1rem;
+  outline: none;
+  font-family: 'Courier New', monospace;
+}
+
+.button-group {
+  display: flex;
+  justify-content: center;
+  margin-top: 1rem;
+}
+
+.button {
+  display: inline-block;
+  background: var(--button-bg);
+  color: #000;
+  padding: 0.5rem 1rem;
+  text-decoration: none;
+  border: 2px solid var(--input-border);
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: bold;
+  text-transform: uppercase;
+  box-shadow: 2px 2px 0 #000;
+}
+
+.button:hover {
+  background: var(--button-hover);
+}
+
+.button:active {
+  box-shadow: 1px 1px 0 #000;
+  transform: translate(1px, 1px);
+}
+
+.footer {
+  text-align: center;
+  margin-top: 2rem;
+  padding: 0.5rem;
+  color: var(--accent);
+  font-size: 0.8rem;
+  border-top: 1px solid var(--input-border);
+}
+
+/* RSI Display Styles */
+.rsi-display {
+  background: #000080;
+  border: 2px solid #00ff00;
+  padding: 20px;
+  margin-top: 20px;
+  color: #00ff00;
+  font-family: 'Courier New', monospace;
+  text-align: center;
+}
+
+.rsi-title {
+  font-size: 1.2em;
+  margin-bottom: 15px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.rsi-value-container {
+  margin: 15px 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  background: #0000a0;
+  border: 2px solid #c0c0c0;
+  padding: 15px;
+  box-shadow: 3px 3px 0 #000;
+}
+
+.rsi-label {
+  font-size: 1em;
+  color: #00ff00;
+  opacity: 0.8;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.rsi-value {
+  font-size: 1.2em;
+  font-weight: bold;
+  text-shadow: 0 0 5px #00ff00;
+  font-family: 'Courier New', monospace;
+  margin: 15px 0;
+  color: #00ff00;
+}
+
+.rsi-timestamp {
+  font-size: 1.2em;
+  color: #00ff00;
+  opacity: 0.8;
+  font-weight: bold;
+  font-family: 'Courier New', monospace;
+}
+
+.loading {
+  font-size: 1.2em;
+  color: #00ff00;
+  animation: blink 1s infinite;
+}
+
+@keyframes blink {
+  0% { opacity: 1; }
+  50% { opacity: 0.5; }
+  100% { opacity: 1; }
+}
+
+.error-message {
+  text-align: center;
+  padding: 1rem;
+  color: var(--overbought);
+  font-weight: bold;
+  background: var(--card-bg);
+  border: 2px solid var(--input-border);
+  box-shadow: 3px 3px 0 #000;
+  margin: 1rem auto;
+  max-width: 500px;
+}
+
+.error-message details {
+  margin-top: 0.5rem;
+  text-align: left;
+  font-size: 0.8rem;
+  color: var(--foreground);
+  background: var(--input-bg);
+  border: 1px solid var(--input-border);
+  padding: 0.5rem;
+}
+
+.error-message summary {
+  cursor: pointer;
+  font-weight: bold;
+  color: var(--accent);
+}
+
+.error-message pre {
+  white-space: pre-wrap;
+  word-break: break-word;
+  margin: 0.5rem 0 0 0;
+  font-family: 'Courier New', monospace;
+  font-size: 0.7rem;
+  line-height: 1.2;
 }

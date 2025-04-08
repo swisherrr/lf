@@ -1,103 +1,164 @@
-import Image from "next/image";
+'use client'
+
+import { useState } from 'react'
+import RsiDisplay from '@/components/RsiDisplay'
 
 export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+  const [ticker, setTicker] = useState('')
+  const [viewMode, setViewMode] = useState<'live' | 'historical'>('live')
+  const [startDate, setStartDate] = useState('')
+  const [endDate, setEndDate] = useState('')
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [errorDetails, setErrorDetails] = useState<string | null>(null)
+  const [rsiData, setRsiData] = useState<{
+    symbol: string
+    rsi: number
+    timestamp: string
+  } | null>(null)
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setIsLoading(true)
+    setError(null)
+    setErrorDetails(null)
+    setRsiData(null)
+
+    try {
+      if (viewMode === 'live') {
+        const response = await fetch(`/api/rsi?symbol=${ticker.toUpperCase()}`)
+        const data = await response.json()
+        
+        if (!response.ok) {
+          setError(data.error || 'Failed to fetch RSI data')
+          if (data.details) {
+            setErrorDetails(String(data.details))
+          } else {
+            setErrorDetails(null)
+          }
+          return
+        }
+        
+        setRsiData(data)
+      } else {
+        // Historical data implementation will be added later
+        setError('Historical data not implemented yet')
+        setErrorDetails('This feature is coming soon')
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'An error occurred')
+      if (err instanceof Error && err.stack) {
+        setErrorDetails(err.stack)
+      } else {
+        setErrorDetails(null)
+      }
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  return (
+    <main className="container">
+      <header>
+        <h1>Stock Technical Analysis</h1>
+        <p>Enter a stock ticker to analyze technical indicators</p>
+      </header>
+
+      <form onSubmit={handleSubmit} className="search-form">
+        <div className="input-group">
+          <input
+            type="text"
+            value={ticker}
+            onChange={(e) => setTicker(e.target.value)}
+            placeholder="Enter stock ticker (e.g., AAPL)"
+            className="ticker-input"
+            required
+          />
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
-  );
+
+        <div className="options-group">
+          <label className="option">
+            <input
+              type="radio"
+              name="viewMode"
+              value="live"
+              checked={viewMode === 'live'}
+              onChange={(e) => setViewMode(e.target.value as 'live' | 'historical')}
+              className="radio-input"
+            />
+            <span className="radio-label">Live</span>
+          </label>
+          <label className="option">
+            <input
+              type="radio"
+              name="viewMode"
+              value="historical"
+              checked={viewMode === 'historical'}
+              onChange={(e) => setViewMode(e.target.value as 'live' | 'historical')}
+              className="radio-input"
+            />
+            <span className="radio-label">Historical</span>
+          </label>
+        </div>
+
+        {viewMode === 'historical' && (
+          <div className="date-range">
+            <div className="input-group">
+              <span className="date-label">Start:</span>
+              <input
+                type="date"
+                value={startDate}
+                onChange={(e) => setStartDate(e.target.value)}
+                className="date-input"
+                required
+              />
+            </div>
+            <div className="input-group">
+              <span className="date-label">End:</span>
+              <input
+                type="date"
+                value={endDate}
+                onChange={(e) => setEndDate(e.target.value)}
+                className="date-input"
+                required
+              />
+            </div>
+          </div>
+        )}
+
+        <div className="button-group">
+          <button type="submit" className="button">
+            Analyze
+          </button>
+        </div>
+      </form>
+
+      {isLoading && <div className="loading-indicator">Loading...</div>}
+      {error && (
+        <div className="error-message">
+          <p>{error}</p>
+          {errorDetails && (
+            <details>
+              <summary>Error Details</summary>
+              <pre>{errorDetails}</pre>
+            </details>
+          )}
+        </div>
+      )}
+      {rsiData && (
+        <RsiDisplay
+          symbol={rsiData.symbol}
+          rsiValue={rsiData.rsi}
+          timestamp={rsiData.timestamp}
+          isLoading={isLoading}
+          error={error}
+          errorDetails={errorDetails}
+        />
+      )}
+
+      <div className="footer">
+        <p>© 2025 LF Holdings</p>
+      </div>
+    </main>
+  )
 }
