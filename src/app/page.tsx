@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import RsiDisplay from '@/components/RsiDisplay'
+import HistoricalRsiDisplay from '@/components/HistoricalRsiDisplay'
 
 export default function Home() {
   const [ticker, setTicker] = useState('')
@@ -11,10 +12,15 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [errorDetails, setErrorDetails] = useState<string | null>(null)
+  const [showResults, setShowResults] = useState(false)
   const [rsiData, setRsiData] = useState<{
     symbol: string
     rsi: number
     timestamp: string
+  } | null>(null)
+  const [historicalData, setHistoricalData] = useState<{
+    symbol: string
+    data: Array<{ date: string; rsi: number }>
   } | null>(null)
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -22,36 +28,40 @@ export default function Home() {
     setIsLoading(true)
     setError(null)
     setErrorDetails(null)
-    setRsiData(null)
+    setShowResults(true)
 
     try {
       if (viewMode === 'live') {
         const response = await fetch(`/api/rsi?symbol=${ticker.toUpperCase()}`)
         const data = await response.json()
         
-        if (!response.ok) {
-          setError(data.error || 'Failed to fetch RSI data')
-          if (data.details) {
-            setErrorDetails(String(data.details))
-          } else {
-            setErrorDetails(null)
-          }
+        if (data.error) {
+          setError(data.error)
+          setErrorDetails(data.details)
           return
         }
         
         setRsiData(data)
       } else {
-        // Historical data implementation will be added later
-        setError('Historical data not implemented yet')
-        setErrorDetails('This feature is coming soon')
+        if (!startDate || !endDate) {
+          setError('Please enter both start and end dates')
+          return
+        }
+        
+        const response = await fetch(`/api/historical-rsi?symbol=${ticker}&startDate=${startDate}&endDate=${endDate}`)
+        const data = await response.json()
+        
+        if (data.error) {
+          setError(data.error)
+          setErrorDetails(data.details)
+          return
+        }
+        
+        setHistoricalData(data)
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred')
-      if (err instanceof Error && err.stack) {
-        setErrorDetails(err.stack)
-      } else {
-        setErrorDetails(null)
-      }
+      setError('Failed to fetch RSI data')
+      setErrorDetails(err instanceof Error ? err.message : String(err))
     } finally {
       setIsLoading(false)
     }
@@ -61,7 +71,7 @@ export default function Home() {
     <main className="container">
       <header>
         <h1>Stock Technical Analysis</h1>
-        <p>Enter a stock ticker to analyze technical indicators</p>
+        <p>Enter a stock ticker to view the RSI</p>
       </header>
 
       <form onSubmit={handleSubmit} className="search-form">
@@ -69,7 +79,7 @@ export default function Home() {
           <input
             type="text"
             value={ticker}
-            onChange={(e) => setTicker(e.target.value)}
+            onChange={(e) => setTicker(e.target.value.toUpperCase())}
             placeholder="Enter stock ticker (e.g., AAPL)"
             className="ticker-input"
             required
@@ -77,36 +87,39 @@ export default function Home() {
         </div>
 
         <div className="options-group">
-          <label className="option">
+          <div className="option">
             <input
               type="radio"
+              id="live"
               name="viewMode"
               value="live"
               checked={viewMode === 'live'}
-              onChange={(e) => setViewMode(e.target.value as 'live' | 'historical')}
+              onChange={() => setViewMode('live')}
               className="radio-input"
             />
-            <span className="radio-label">Live</span>
-          </label>
-          <label className="option">
+            <label htmlFor="live" className="radio-label">Live</label>
+          </div>
+          <div className="option">
             <input
               type="radio"
+              id="historical"
               name="viewMode"
               value="historical"
               checked={viewMode === 'historical'}
-              onChange={(e) => setViewMode(e.target.value as 'live' | 'historical')}
+              onChange={() => setViewMode('historical')}
               className="radio-input"
             />
-            <span className="radio-label">Historical</span>
-          </label>
+            <label htmlFor="historical" className="radio-label">Historical</label>
+          </div>
         </div>
 
         {viewMode === 'historical' && (
           <div className="date-range">
             <div className="input-group">
-              <span className="date-label">Start:</span>
+              <label htmlFor="startDate" className="date-label">Start Date:</label>
               <input
                 type="date"
+                id="startDate"
                 value={startDate}
                 onChange={(e) => setStartDate(e.target.value)}
                 className="date-input"
@@ -114,9 +127,10 @@ export default function Home() {
               />
             </div>
             <div className="input-group">
-              <span className="date-label">End:</span>
+              <label htmlFor="endDate" className="date-label">End Date:</label>
               <input
                 type="date"
+                id="endDate"
                 value={endDate}
                 onChange={(e) => setEndDate(e.target.value)}
                 className="date-input"
@@ -133,23 +147,21 @@ export default function Home() {
         </div>
       </form>
 
-      {isLoading && <div className="loading-indicator">Loading...</div>}
-      {error && (
-        <div className="error-message">
-          <p>{error}</p>
-          {errorDetails && (
-            <details>
-              <summary>Error Details</summary>
-              <pre>{errorDetails}</pre>
-            </details>
-          )}
-        </div>
-      )}
-      {rsiData && (
+      {showResults && viewMode === 'live' && (
         <RsiDisplay
-          symbol={rsiData.symbol}
-          rsiValue={rsiData.rsi}
-          timestamp={rsiData.timestamp}
+          symbol={rsiData?.symbol || null}
+          rsiValue={rsiData?.rsi || null}
+          timestamp={rsiData?.timestamp || null}
+          isLoading={isLoading}
+          error={error}
+          errorDetails={errorDetails}
+        />
+      )}
+
+      {showResults && viewMode === 'historical' && (
+        <HistoricalRsiDisplay
+          symbol={historicalData?.symbol || null}
+          data={historicalData?.data || null}
           isLoading={isLoading}
           error={error}
           errorDetails={errorDetails}
