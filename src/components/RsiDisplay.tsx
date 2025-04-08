@@ -58,7 +58,7 @@ const RsiDisplay: React.FC<RsiDisplayProps> = ({
 
   return (
     <div className="rsi-display">
-      <div className="rsi-title">RSI Analysis for {symbol}</div>
+      <div className="rsi-title">{symbol}</div>
       <table className="rsi-data-table">
         <colgroup>
           <col style={{ width: '60%' }} />
